@@ -1,0 +1,52 @@
+name: Create backup of qiita articles as markdown files
+on:
+  schedule:
+    - cron:  '0 * * * *'
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: backup
+    runs-on: ubuntu-latest
+    env:
+      USERNAME: "yumenomatayume"
+      TZ: "Asia/Tokyo"
+    if: contains(github.event.head_commit.message, '[ci skip]') == false
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Install required packages
+      run: |
+        sudo apt update -y
+        sudo apt install -y jq nkf
+    - name: Run shell script
+      run: |
+        articles=$(curl -s "https://qiita.com/api/v2//users/${USERNAME}/items?per_page=100" | jq -r ".[].url")
+        for article in $articles;do
+          file=$(echo "$(curl -s $article.md | grep '^title:' | sed -E 's/^title: //g').md" | nkf -w --url-input)
+          curl -s $article.md > "$file"
+        done
+
+    - name: Run git status
+      id: status
+      run: |
+        echo "::set-output name=status::$(git status -s)"
+
+    - name: Add and commit files
+      run: |
+        git add .
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "Add changes at $(date "+DATE: %Y-%m-%d TIME: %H:%M:%S")"
+      if: ${{ steps.status.outputs.status }}
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+      if: ${{ steps.status.outputs.status }}
