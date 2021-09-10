@@ -182,3 +182,9 @@ passwd $6$salt$IxDD3~(略)~y.g. user
     password: $6$salt$IxDD3~(略)~y.g.
 ```
 
+### その他の方法
+
+ハッシュが作れるサイトもあるようです。
+
+http://webadmin.jp/toolhash/
+
