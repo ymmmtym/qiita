@@ -26,7 +26,7 @@ DockerhubからGithub Container Registry にイメージを移行する際の自
 ghcrには以下のコマンドでログインする
 
 ```console
-dockerer login ghcr.io -u $OWNER #Githubのアカウント名
+docker login ghcr.io -u $OWNER #Githubのアカウント名
 Password: <パスワードはパーソナルアクセストークンを入力> 
 Login Succeeded
 ```
